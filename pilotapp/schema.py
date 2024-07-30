@@ -22,7 +22,7 @@ class OrderItemType(DjangoObjectType):
         model = OrderItem
         fields = ('id', 'order', 'product', 'quantity', 'instruction')
 
-class OrderType(DjangoObjectType):
+class Order(DjangoObjectType):
     class Meta:
         model = Order
         fields = ('id', 'order_items', 'order_time', 'total_cost')
@@ -37,7 +37,7 @@ class Query(graphene.ObjectType):
     tags = graphene.List(TagType)
     categories = graphene.List(CategoryType)
     products = graphene.List(ProductType)
-    orders = graphene.List(OrderType)
+    orders = graphene.List(Order)
 
     def resolve_tags(self, info):
         return Tag.objects.all()
