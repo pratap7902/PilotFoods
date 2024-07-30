@@ -51,4 +51,31 @@ class Query(graphene.ObjectType):
     def resolve_orders(self, info):
         return Order.objects.all()
 
-schema = graphene.Schema(query=Query)
+
+
+class CreateCategory(graphene.Mutation):
+    category=graphene.Field(CategoryType)
+
+    class Arguments:
+        category_name = graphene.String(required=True)
+        description = graphene.String(required=True)
+        
+
+    def mutate(self, info, category_name,description):
+        
+        category= Category(category_name=category_name,description=description)
+        category.save()
+
+        return CreateCategory(category=category)
+
+
+class Mutation(graphene.ObjectType):
+    create_category = CreateCategory.Field()
+
+
+
+
+
+
+
+schema = graphene.Schema(query=Query,mutation=Mutation)
