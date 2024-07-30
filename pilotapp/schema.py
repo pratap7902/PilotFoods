@@ -53,6 +53,54 @@ class Query(graphene.ObjectType):
 
 
 
+
+
+class CreateTag(graphene.Mutation):
+    tags = graphene.Field(TagType)
+
+    class Arguments:
+        tag_name = graphene.String(required=True)
+
+    def mutate(self, info, tag_name):
+        tags = Tag(tag_name=tag_name)
+        tags.save()
+
+        return CreateTag(tags=tags)
+
+
+class CreateProduct(graphene.Mutation):
+    product = graphene.Field(ProductType)
+
+    class Arguments:
+        product_name = graphene.String(required=True)
+        price = graphene.Decimal(required=True)
+        description = graphene.String(required=True)
+        category_name = graphene.String(required=True)
+        tag_names = graphene.List(graphene.String, required=True)
+
+    def mutate(self, info, product_name, price, description, category_name, tag_names):
+        try:
+            category = Category.objects.get(category_name=category_name)
+        except Category.DoesNotExist:
+            raise Exception("Category does not exist")
+
+        tags = []
+        for tag_name in tag_names:
+            try:
+                tag = Tag.objects.get(tag_name=tag_name)
+            except Tag.DoesNotExist:
+                tag = Tag(tag_name=tag_name)
+                tag.save()
+            tags.append(tag)
+
+        product = Product(product_name=product_name, price=price, description=description, category=category)
+        product.save()
+        product.tag.set(tags)
+
+        return CreateProduct(product=product)
+
+
+
 class CreateCategory(graphene.Mutation):
     category=graphene.Field(CategoryType)
 
@@ -71,7 +119,8 @@ class CreateCategory(graphene.Mutation):
 
 class Mutation(graphene.ObjectType):
     create_category = CreateCategory.Field()
-
+    create_tag = CreateTag.Field()
+    create_product = CreateProduct.Field()
 
 
 
