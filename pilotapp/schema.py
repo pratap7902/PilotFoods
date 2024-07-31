@@ -1,7 +1,7 @@
 import graphene
 from graphene_django import DjangoObjectType
 from .models import Tag, Category, Product, Order, OrderItem
-
+#check comment
 class TagType(DjangoObjectType):
     class Meta:
         model = Tag
