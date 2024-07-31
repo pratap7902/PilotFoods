@@ -28,7 +28,7 @@ class Orders(DjangoObjectType):
         model = Order
         fields = ('id', 'order_items', 'order_time', 'total_cost')
 
-    order_items = graphene.List(OrderItemType)
+
 
     def resolve_order_items(self, info):
         return self.order_items.all()
@@ -140,10 +140,7 @@ class CreateOrder(graphene.Mutation):
 
         for item in order_items:
             product = Product.objects.get(id=item.product_id)
-            print(product.product_name)
             order_item = OrderItem(order=order, product=product, quantity=item.quantity, instruction=item.instruction)
-            
-            print(order_item)
             order_item.save()
             total_cost += product.price * item.quantity
 
