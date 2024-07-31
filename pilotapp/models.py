@@ -19,7 +19,7 @@ class Product(models.Model):
 
 class Order(models.Model):
     order_items= models.ManyToManyField(Product,through="OrderItem")
-    order_time = datetime.time()
+    order_time = models.DateTimeField(default=datetime.datetime)
     total_cost = models.FloatField(default=0)
 
 class OrderItem(models.Model):
