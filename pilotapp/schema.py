@@ -1,3 +1,4 @@
+import datetime
 import graphene
 from graphene_django import DjangoObjectType
 from .models import Tag, Category, Product, Order, OrderItem
@@ -22,7 +23,7 @@ class OrderItemType(DjangoObjectType):
         model = OrderItem
         fields = ('id', 'order', 'product', 'quantity', 'instruction')
 
-class Order(DjangoObjectType):
+class Orders(DjangoObjectType):
     class Meta:
         model = Order
         fields = ('id', 'order_items', 'order_time', 'total_cost')
@@ -37,7 +38,7 @@ class Query(graphene.ObjectType):
     tags = graphene.List(TagType)
     categories = graphene.List(CategoryType)
     products = graphene.List(ProductType)
-    orders = graphene.List(Order)
+    orders = graphene.List(Orders)
 
     def resolve_tags(self, info):
         return Tag.objects.all()
@@ -117,10 +118,52 @@ class CreateCategory(graphene.Mutation):
         return CreateCategory(category=category)
 
 
+
+
+class OrderItemInput(graphene.InputObjectType):
+    product_id = graphene.ID(required=True)
+    quantity = graphene.Int(required=True)
+    instruction = graphene.String(required=True)
+
+class CreateOrder(graphene.Mutation):
+    order = graphene.Field(Orders)
+
+    class Arguments:
+        order_items = graphene.List(OrderItemInput)
+
+    def mutate(self, info, order_items):
+        
+        total_cost = 0
+
+        order = Order()
+        order.save()
+
+        for item in order_items:
+            product = Product.objects.get(id=item.product_id)
+            print(product.product_name)
+            order_item = OrderItem(order=order, product=product, quantity=item.quantity, instruction=item.instruction)
+            
+            print(order_item)
+            order_item.save()
+            total_cost += product.price * item.quantity
+
+        order.total_cost = total_cost
+        order.save()
+
+        return CreateOrder(order=order)
+
+
+
+
+
+
+
+
 class Mutation(graphene.ObjectType):
     create_category = CreateCategory.Field()
     create_tag = CreateTag.Field()
     create_product = CreateProduct.Field()
+    create_order = CreateOrder.Field()
 
 
 

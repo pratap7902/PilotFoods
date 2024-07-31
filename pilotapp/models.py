@@ -19,7 +19,7 @@ class Product(models.Model):
 
 class Order(models.Model):
     order_items= models.ManyToManyField(Product,through="OrderItem")
-    order_time = datetime.time()
+    order_time = models.DateTimeField(default=datetime.datetime.now())
     total_cost = models.FloatField(default=0)
 
 class OrderItem(models.Model):
@@ -29,7 +29,7 @@ class OrderItem(models.Model):
     instruction = models.TextField()
 
     def __str__():
-        return f"Order Id : {id}"
+        return f"Order Id : {id} product details: \n name:{product.product_name}\n price:{product.product_name}"
 
 
         
