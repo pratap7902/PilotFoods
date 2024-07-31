@@ -29,7 +29,7 @@ class OrderItem(models.Model):
     instruction = models.TextField()
 
     def __str__():
-        return f"Order Id : {id} product details: \n name:{product.product_name}\n price:{product.product_name}"
+        return f"Order Id : {id} "
 
 
         
