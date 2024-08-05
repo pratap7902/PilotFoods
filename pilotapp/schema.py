@@ -3,25 +3,38 @@ import graphene
 from graphene_django import DjangoObjectType
 from .models import Tag, Category, Product, Order, OrderItem
 
+
+# Schema Definition for Tag Model
+
 class TagType(DjangoObjectType):
     class Meta:
         model = Tag
         fields = ('id', 'tag_name')
+
+# Schema Definition for Category Model
 
 class CategoryType(DjangoObjectType):
     class Meta:
         model = Category
         fields = ('id', 'category_name', 'description')
 
+# Schema Definition for Product Model
+
 class ProductType(DjangoObjectType):
     class Meta:
         model = Product
         fields = ('id', 'product_name', 'price', 'description', 'category', 'tag')
 
+
+# Schema Definition for OrderItem Model
+
 class OrderItemType(DjangoObjectType):
     class Meta:
         model = OrderItem
         fields = ('id', 'order', 'product', 'quantity', 'instruction')
+
+
+# Schema Definition for Orders Model
 
 class Orders(DjangoObjectType):
     class Meta:
@@ -30,10 +43,12 @@ class Orders(DjangoObjectType):
 
 
 
-    def resolve_order_items(self, info):
+    def resolve_order_items(self, info):        # resolving each order item associated with the order
         return self.order_items.all()
 
 
+
+# Querries for all models
 class Query(graphene.ObjectType):
     tags = graphene.List(TagType)
     categories = graphene.List(CategoryType)
@@ -55,6 +70,7 @@ class Query(graphene.ObjectType):
 
 
 
+# Mutation to create a Tag
 
 class CreateTag(graphene.Mutation):
     tags = graphene.Field(TagType)
@@ -67,6 +83,15 @@ class CreateTag(graphene.Mutation):
         tags.save()
 
         return CreateTag(tags=tags)
+
+
+
+
+
+
+
+# Mutation to create a Product
+
 
 
 class CreateProduct(graphene.Mutation):
@@ -119,12 +144,17 @@ class CreateCategory(graphene.Mutation):
 
 
 
-
+# properties required to define a product in a order
+#Note- product_id and quantity are required fields
 class OrderItemInput(graphene.InputObjectType):
     product_id = graphene.ID(required=True)
     quantity = graphene.Int(required=True)
-    instruction = graphene.String(required=True)
+    instruction = graphene.String(default="Null")
 
+
+
+
+#Mutation to create an order
 class CreateOrder(graphene.Mutation):
     order = graphene.Field(Orders)
 
@@ -136,7 +166,7 @@ class CreateOrder(graphene.Mutation):
         total_cost = 0
 
         order = Order()
-        order.save()
+        
 
         for item in order_items:
             product = Product.objects.get(id=item.product_id)
@@ -155,7 +185,7 @@ class CreateOrder(graphene.Mutation):
 
 
 
-
+#Mutation class
 class Mutation(graphene.ObjectType):
     create_category = CreateCategory.Field()
     create_tag = CreateTag.Field()
