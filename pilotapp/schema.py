@@ -196,9 +196,6 @@ class CreateOrder(graphene.Mutation):
         return CreateOrder(order=order)
 
 
-import graphene
-from graphene_django import DjangoObjectType
-from .models import Category, Product
 
 class DeleteCategory(graphene.ObjectType):
     success = graphene.Boolean()
