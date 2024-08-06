@@ -2,6 +2,7 @@ import datetime
 import graphene
 from graphene_django import DjangoObjectType
 from .models import Tag, Category, Product, Order, OrderItem
+from .tasks import send_email
 
 
 # Schema Definition for Tag Model
@@ -32,19 +33,18 @@ class OrderItemType(DjangoObjectType):
     class Meta:
         model = OrderItem
         fields = ('id', 'order', 'product', 'quantity', 'instruction')
-
+        products = graphene.List(ProductType)
 
 # Schema Definition for Orders Model
 
 class Orders(DjangoObjectType):
     class Meta:
         model = Order
-        fields = ('id', 'order_items', 'order_time', 'total_cost')
+        fields = ('id', 'products', 'order_time', 'total_cost')
+    products=graphene.List(OrderItemType)
 
-
-
-    def resolve_order_items(self, info):        # resolving each order item associated with the order
-        return self.order_items.all()
+    def resolve_products(self, info):        # resolving each order item associated with the order
+        return self.products.all()
 
 
 
@@ -54,6 +54,8 @@ class Query(graphene.ObjectType):
     categories = graphene.List(CategoryType)
     products = graphene.List(ProductType)
     orders = graphene.List(Orders)
+    order_single = graphene.Field(Orders, id=graphene.Int())
+    product =  graphene.Field(ProductType, id=graphene.Int())
 
     def resolve_tags(self, info):
         return Tag.objects.all()
@@ -66,7 +68,12 @@ class Query(graphene.ObjectType):
 
     def resolve_orders(self, info):
         return Order.objects.all()
+    
+    def resolve_order_single(self, info,id):
+        return Order.objects.get(pk=id)
 
+    def resolve_product(self,info,id):
+        return Product.objects.get(pk=id)
 
 
 
@@ -162,21 +169,17 @@ class CreateOrder(graphene.Mutation):
         order_items = graphene.List(OrderItemInput)
 
     def mutate(self, info, order_items):
-        
-        total_cost = 0
-
-        order = Order()
-        
-
+        order = Order.objects.create(order_time=datetime.datetime.now())
         for item in order_items:
             product = Product.objects.get(id=item.product_id)
-            order_item = OrderItem(order=order, product=product, quantity=item.quantity, instruction=item.instruction)
-            order_item.save()
-            total_cost += product.price * item.quantity
-
-        order.total_cost = total_cost
+            order_item = OrderItem.objects.create(
+                product=product,
+                quantity=item.quantity,
+                instruction=item.instruction
+            )
+            order.products.add(order_item)
+        order.total_cost = sum(item.product.price * item.quantity for item in order.products.all())
         order.save()
-
         return CreateOrder(order=order)
 
 

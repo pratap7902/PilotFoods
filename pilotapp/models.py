@@ -23,22 +23,24 @@ class Product(models.Model):
     tag = models.ManyToManyField(Tag)
 
 
-# Order Model
-class Order(models.Model):
-    order_items= models.ManyToManyField(Product,through='OrderItem')
-    order_time = models.DateTimeField(default=datetime.datetime.now())
-    total_cost = models.FloatField(default=0)
-
 
 #Order Item Model (Contains each product associated with a particular order)
 class OrderItem(models.Model):
     product = models.ForeignKey(Product,on_delete=models.CASCADE)    
-    order=models.ForeignKey(Order,on_delete=models.CASCADE)
     quantity = models.IntegerField()
     instruction = models.TextField()
 
     def __str__():
         return f"Order Id : {id} "
+
+
+
+
+# Order Model
+class Order(models.Model):
+    products= models.ManyToManyField(OrderItem)
+    order_time = models.DateTimeField()
+    total_cost = models.FloatField(default=0)
 
 
         
