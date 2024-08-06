@@ -56,6 +56,13 @@ class Query(graphene.ObjectType):
     order_single = graphene.Field(Orders, id=graphene.Int())
     product =  graphene.Field(ProductType, id=graphene.Int())
 
+
+    order_page = graphene.List(
+        Orders,
+        first=graphene.Int(),
+        skip=graphene.Int(),
+    )
+
     def resolve_tags(self, info):
         return Tag.objects.all()
 
@@ -73,6 +80,16 @@ class Query(graphene.ObjectType):
 
     def resolve_product(self,info,id):
         return Product.objects.get(pk=id)
+    
+    def resolve_order_page(self, info, first=None, skip=None, **kwargs):
+        qs = Order.objects.all()
+        if skip:
+            qs = qs[skip:]
+
+        if first:
+            qs = qs[:first]
+
+        return qs
 
 
 
@@ -179,7 +196,69 @@ class CreateOrder(graphene.Mutation):
         return CreateOrder(order=order)
 
 
+import graphene
+from graphene_django import DjangoObjectType
+from .models import Category, Product
 
+class DeleteCategory(graphene.ObjectType):
+    success = graphene.Boolean()
+
+class DeleteCategoryMutation(graphene.Mutation):
+    class Arguments:
+        id = graphene.ID(required=True)
+
+    result = graphene.Field(DeleteCategory)
+
+    def mutate(self, info, id):
+        try:
+            category = Category.objects.get(id=id)
+            category.delete()
+            return DeleteCategoryMutation(result=DeleteCategory(success=True))
+        except Category.DoesNotExist:
+            return DeleteCategoryMutation(result=DeleteCategory(success=False))
+
+class DeleteProduct(graphene.ObjectType):
+    success = graphene.Boolean()
+
+class DeleteProductMutation(graphene.Mutation):
+    class Arguments:
+        id = graphene.ID(required=True)
+
+    result = graphene.Field(DeleteProduct)
+
+    def mutate(self, info, id):
+        try:
+            product = Product.objects.get(id=id)
+            product.delete()
+            return DeleteProductMutation(result=DeleteProduct(success=True))
+        except Product.DoesNotExist:
+            return DeleteProductMutation(result=DeleteProduct(success=False))
+
+class UpdateProduct(graphene.ObjectType):
+    product = graphene.Field(Product)
+
+class UpdateProductMutation(graphene.Mutation):
+    class Arguments:
+        id = graphene.ID(required=True)
+        product_name = graphene.String()
+        price = graphene.Int()
+        description = graphene.String()
+
+    result = graphene.Field(UpdateProduct)
+
+    def mutate(self, info, id, product_name=None, price=None, description=None):
+        try:
+            product = Product.objects.get(id=id)
+            if product_name:
+                product.product_name = product_name
+            if price:
+                product.price = price
+            if description:
+                product.description = description
+            product.save()
+            return UpdateProductMutation(result=UpdateProduct(product=product))
+        except Product.DoesNotExist:
+            return UpdateProductMutation(result=UpdateProduct(product=None))
 
 
 
@@ -190,6 +269,9 @@ class Mutation(graphene.ObjectType):
     create_tag = CreateTag.Field()
     create_product = CreateProduct.Field()
     create_order = CreateOrder.Field()
+    delete_category = DeleteCategoryMutation.Field()
+    delete_product = DeleteProductMutation.Field()
+    update_product = UpdateProductMutation.Field()
 
 
 

@@ -76,23 +76,24 @@ def list_orders(request):
        
 
 
-    url = 'http://localhost:8000/graphql/'
+    # url = 'http://localhost:8000/graphql/'
 
    
-    query = "query OrderAll {\n  orders {\n    id\n    products {\n      product {\n        productName\n        price\n        description\n        id\n        category {\n          description\n          categoryName\n          id\n        }\n        tag {\n          id\n          tagName\n        }\n      }\n      id\n      instruction\n      quantity\n    }\n    orderTime\n    totalCost\n  }\n}"
+    # query = "query OrderAll {\n  orders {\n    id\n    products {\n      product {\n        productName\n        price\n        description\n        id\n        category {\n          description\n          categoryName\n          id\n        }\n        tag {\n          id\n          tagName\n        }\n      }\n      id\n      instruction\n      quantity\n    }\n    orderTime\n    totalCost\n  }\n}"
 
    
-    response = requests.post(url, json={'query': query})
+    # response = requests.post(url, json={'query': query})
 
    
-    return JsonResponse(response.json()['data'])
+    # return JsonResponse(response.json()['data'])
 
 
   
-    # data = Order.objects.all().values()
+    data = Order.objects.all()
     # json_data = json.dumps(list(data))
+    json_data = serializers.serialize('json', data)
 
-    # return HttpResponse(json_data, content_type='application/json')
+    return HttpResponse(json_data, content_type='application/json')
 
 
 
@@ -102,6 +103,7 @@ def list_orders(request):
 
 def order_detail(request,id):
 
-    data = Order.objects.filter(pk=id).values()
-    json_data = json.dumps(list(data))
+    data = Order.objects.filter(pk=id)
+    # json_data = json.dumps(list(data))
+    json_data = serializers.serialize('json', data)
     return HttpResponse(json_data, content_type='application/json')
