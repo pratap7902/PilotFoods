@@ -6,7 +6,7 @@ import requests
 from django.shortcuts import render        
 from django.http import HttpResponse
 from django.http import JsonResponse
-from pilotapp.models import Product
+from pilotapp.models import Product, Order
 from django.core import serializers
 
 
@@ -51,7 +51,7 @@ def list_products(request):
 
 
 
-def product(request,id):
+def product_detail(request,id):
 
     # url = 'http://localhost:8000/graphql/'
 
@@ -65,5 +65,31 @@ def product(request,id):
     # return JsonResponse(response.json()['data'])
 
     data = Product.objects.filter(pk=id).values()
+    json_data = json.dumps(list(data))
+    return HttpResponse(json_data, content_type='application/json')
+
+
+
+
+
+def list_orders(request):
+       
+    data = Order.objects.all().values()
+    json_data = json.dumps(list(data))
+
+
+
+
+    return HttpResponse(json_data, content_type='application/json')
+
+
+
+
+
+
+
+def order_detail(request,id):
+
+    data = Order.objects.filter(pk=id).values()
     json_data = json.dumps(list(data))
     return HttpResponse(json_data, content_type='application/json')

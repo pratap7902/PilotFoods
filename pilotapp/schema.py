@@ -150,9 +150,6 @@ class CreateCategory(graphene.Mutation):
         return CreateCategory(category=category)
 
 
-
-# properties required to define a product in a order
-#Note- product_id and quantity are required fields
 class OrderItemInput(graphene.InputObjectType):
     product_id = graphene.ID(required=True)
     quantity = graphene.Int(required=True)
