@@ -2,7 +2,6 @@ import datetime
 import graphene
 from graphene_django import DjangoObjectType
 from .models import Tag, Category, Product, Order, OrderItem
-from .tasks import send_email
 
 
 # Schema Definition for Tag Model
