@@ -31,7 +31,7 @@ class ProductType(DjangoObjectType):
 class OrderItemType(DjangoObjectType):
     class Meta:
         model = OrderItem
-        fields = ('id', 'order', 'product', 'quantity', 'instruction')
+        fields = ('id', 'product', 'quantity', 'instruction')
         products = graphene.List(ProductType)
 
 # Schema Definition for Orders Model
@@ -166,6 +166,10 @@ class CreateCategory(graphene.Mutation):
         return CreateCategory(category=category)
 
 
+
+
+
+#Order Items for each order
 class OrderItemInput(graphene.InputObjectType):
     product_id = graphene.ID(required=True)
     quantity = graphene.Int(required=True)
@@ -197,51 +201,55 @@ class CreateOrder(graphene.Mutation):
 
 
 
-class DeleteCategory(graphene.ObjectType):
-    success = graphene.Boolean()
 
+# mutation to delete an order
 class DeleteCategoryMutation(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
-
-    result = graphene.Field(DeleteCategory)
+    success = graphene.Boolean()
 
     def mutate(self, info, id):
         try:
             category = Category.objects.get(id=id)
             category.delete()
-            return DeleteCategoryMutation(result=DeleteCategory(success=True))
+            return DeleteCategoryMutation(success=True)
         except Category.DoesNotExist:
-            return DeleteCategoryMutation(result=DeleteCategory(success=False))
+            return DeleteCategoryMutation(success=False)
 
-class DeleteProduct(graphene.ObjectType):
-    success = graphene.Boolean()
+
+
+
+#Mutation to delete a product
 
 class DeleteProductMutation(graphene.Mutation):
+    success = graphene.Boolean()
+
     class Arguments:
         id = graphene.ID(required=True)
-
-    result = graphene.Field(DeleteProduct)
-
+    
     def mutate(self, info, id):
         try:
             product = Product.objects.get(id=id)
             product.delete()
-            return DeleteProductMutation(result=DeleteProduct(success=True))
+            return DeleteProductMutation(success=True)
         except Product.DoesNotExist:
-            return DeleteProductMutation(result=DeleteProduct(success=False))
+            return DeleteProductMutation(success=False)
 
-class UpdateProduct(graphene.ObjectType):
-    product = graphene.Field(Product)
 
+
+
+
+#Mutation to update a product
 class UpdateProductMutation(graphene.Mutation):
+
+    product = graphene.Field(ProductType)
     class Arguments:
         id = graphene.ID(required=True)
         product_name = graphene.String()
         price = graphene.Int()
         description = graphene.String()
 
-    result = graphene.Field(UpdateProduct)
+    result = graphene.Field(ProductType)
 
     def mutate(self, info, id, product_name=None, price=None, description=None):
         try:
@@ -253,9 +261,9 @@ class UpdateProductMutation(graphene.Mutation):
             if description:
                 product.description = description
             product.save()
-            return UpdateProductMutation(result=UpdateProduct(product=product))
+            return UpdateProductMutation(result=product)
         except Product.DoesNotExist:
-            return UpdateProductMutation(result=UpdateProduct(product=None))
+            return UpdateProductMutation(result=None)
 
 
 
