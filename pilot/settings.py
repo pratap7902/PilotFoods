@@ -36,6 +36,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = ["pilotapp",
     "graphene_django",
+    "django_rq",
     'redis',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -134,6 +135,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 GRAPHENE = {
 'SCHEMA': 'pilot.schema.schema'
+}
+
+
+RQ_QUEUES = {
+    'default': {
+        'HOST': 'localhost',
+        'PORT': 6379,
+        'DB': 0,
+        'DEFAULT_TIMEOUT': 360,
+    },
 }
 
 

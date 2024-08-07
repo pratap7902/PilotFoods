@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from pilotapp.models import Product, Order
 from django.core import serializers
+from .tasks import send_email_task
 
 
 
@@ -106,4 +107,5 @@ def order_detail(request,id):
     data = Order.objects.filter(pk=id)
     # json_data = json.dumps(list(data))
     json_data = serializers.serialize('json', data)
+    send_email_task.delay(id)
     return HttpResponse(json_data, content_type='application/json')
